@@ -1,0 +1,32 @@
+venv/
+__pycache__/
+.ipynb_checkpoints/
+data/raw/
+data/processed/
+data/**/*.csv
+data/**/*.parquet
+data/**/*.json
+*.pkl
+*.joblib
+*.zip
+*.pt
+*.pth
+*.ckpt
+
+# Python cache/build artifacts
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+
+# Local experiment outputs
+artifacts/
+models/**/*.pkl
+models/**/*.joblib
+models/**/*.pt
+models/**/*.pth
