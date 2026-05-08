@@ -1,0 +1,119 @@
+{
+  "generated_at_utc": "2026-05-08T11:52:41.060507+00:00",
+  "seed": 42,
+  "train_rows": 87852,
+  "val_rows": 4886,
+  "test_rows": 4934,
+  "vectorizer": {
+    "max_features": 20000,
+    "ngram_range": [
+      1,
+      2
+    ],
+    "min_df": 2,
+    "stop_words": "english",
+    "sublinear_tf": true
+  },
+  "kmeans": {
+    "model_name": "kmeans_label_mapped",
+    "clusters": 4,
+    "cluster_label_mapping": {
+      "2": "C",
+      "1": "C",
+      "0": "C",
+      "3": "C"
+    },
+    "validation_metrics": {
+      "accuracy": 0.26668031109291856,
+      "macro_f1": 0.10526740992082727,
+      "confusion_matrix_labels": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "confusion_matrix": [
+        [
+          0,
+          0,
+          1067,
+          0
+        ],
+        [
+          0,
+          0,
+          1290,
+          0
+        ],
+        [
+          0,
+          0,
+          1303,
+          0
+        ],
+        [
+          0,
+          0,
+          1226,
+          0
+        ]
+      ]
+    },
+    "test_metrics": {
+      "accuracy": 0.2683421159302797,
+      "macro_f1": 0.10578459571748162,
+      "confusion_matrix_labels": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "confusion_matrix": [
+        [
+          0,
+          0,
+          1063,
+          0
+        ],
+        [
+          0,
+          0,
+          1323,
+          0
+        ],
+        [
+          0,
+          0,
+          1324,
+          0
+        ],
+        [
+          0,
+          0,
+          1224,
+          0
+        ]
+      ]
+    },
+    "silhouette_score": 0.006251418273595821
+  },
+  "comparison": {
+    "validation_table_sorted_by_macro_f1": [
+      {
+        "model_name": "linear_svm",
+        "validation_accuracy": 0.2781416291444945,
+        "validation_macro_f1": 0.2745674100786548
+      },
+      {
+        "model_name": "logistic_regression",
+        "validation_accuracy": 0.26852230863692184,
+        "validation_macro_f1": 0.26122041620990355
+      },
+      {
+        "model_name": "kmeans_label_mapped",
+        "validation_accuracy": 0.26668031109291856,
+        "validation_macro_f1": 0.10526740992082727
+      }
+    ]
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "generated_at_utc": "2026-05-08T11:41:25.998939+00:00",
+  "seed": 42,
+  "train_rows": 87852,
+  "val_rows": 4886,
+  "test_rows": 4934,
+  "vectorizer": {
+    "max_features": 20000,
+    "ngram_range": [
+      1,
+      2
+    ],
+    "min_df": 2,
+    "stop_words": "english",
+    "sublinear_tf": true
+  },
+  "models": {
+    "logistic_regression": {
+      "model_name": "logistic_regression",
+      "validation_metrics": {
+        "accuracy": 0.26852230863692184,
+        "macro_f1": 0.26122041620990355,
+        "confusion_matrix_labels": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "confusion_matrix": [
+          [
+            169,
+            303,
+            333,
+            262
+          ],
+          [
+            160,
+            369,
+            437,
+            324
+          ],
+          [
+            174,
+            350,
+            444,
+            335
+          ],
+          [
+            169,
+            335,
+            392,
+            330
+          ]
+        ]
+      }
+    },
+    "linear_svm": {
+      "model_name": "linear_svm",
+      "validation_metrics": {
+        "accuracy": 0.2781416291444945,
+        "macro_f1": 0.2745674100786548,
+        "confusion_matrix_labels": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "confusion_matrix": [
+          [
+            222,
+            264,
+            312,
+            269
+          ],
+          [
+            198,
+            370,
+            384,
+            338
+          ],
+          [
+            219,
+            338,
+            424,
+            322
+          ],
+          [
+            229,
+            304,
+            350,
+            343
+          ]
+        ]
+      }
+    }
+  }
+}

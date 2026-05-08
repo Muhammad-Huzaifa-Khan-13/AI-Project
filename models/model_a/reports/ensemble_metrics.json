@@ -1,0 +1,118 @@
+{
+  "generated_at_utc": "2026-05-08T11:56:53.994769+00:00",
+  "seed": 42,
+  "train_rows": 87852,
+  "val_rows": 4886,
+  "test_rows": 4934,
+  "vectorizer": {
+    "max_features": 20000,
+    "ngram_range": [
+      1,
+      2
+    ],
+    "min_df": 2,
+    "stop_words": "english",
+    "sublinear_tf": true
+  },
+  "ensemble": {
+    "model_name": "ensemble_hard_vote_lr_svm",
+    "voting_strategy": "hard_vote_with_lr_tie_breaker",
+    "validation_metrics": {
+      "accuracy": 0.26852230863692184,
+      "macro_f1": 0.26122041620990355,
+      "confusion_matrix_labels": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "confusion_matrix": [
+        [
+          169,
+          303,
+          333,
+          262
+        ],
+        [
+          160,
+          369,
+          437,
+          324
+        ],
+        [
+          174,
+          350,
+          444,
+          335
+        ],
+        [
+          169,
+          335,
+          392,
+          330
+        ]
+      ]
+    },
+    "validation_disagreement_rate_lr_vs_svm": 0.25890298812934914,
+    "test_metrics": {
+      "accuracy": 0.27300364815565464,
+      "macro_f1": 0.2652088880906043,
+      "confusion_matrix_labels": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "confusion_matrix": [
+        [
+          171,
+          287,
+          372,
+          233
+        ],
+        [
+          191,
+          379,
+          460,
+          293
+        ],
+        [
+          181,
+          358,
+          466,
+          319
+        ],
+        [
+          151,
+          327,
+          415,
+          331
+        ]
+      ]
+    }
+  },
+  "comparison": {
+    "validation_table_sorted_by_macro_f1": [
+      {
+        "model_name": "linear_svm",
+        "validation_accuracy": 0.2781416291444945,
+        "validation_macro_f1": 0.2745674100786548
+      },
+      {
+        "model_name": "ensemble_hard_vote_lr_svm",
+        "validation_accuracy": 0.26852230863692184,
+        "validation_macro_f1": 0.26122041620990355
+      },
+      {
+        "model_name": "logistic_regression",
+        "validation_accuracy": 0.26852230863692184,
+        "validation_macro_f1": 0.26122041620990355
+      },
+      {
+        "model_name": "kmeans_label_mapped",
+        "validation_accuracy": 0.26668031109291856,
+        "validation_macro_f1": 0.10526740992082727
+      }
+    ]
+  }
+}

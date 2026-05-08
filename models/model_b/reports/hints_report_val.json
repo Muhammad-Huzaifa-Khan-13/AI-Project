@@ -1,0 +1,133 @@
+{
+  "generated_at_utc": "2026-05-08T12:36:15.155093+00:00",
+  "seed": 42,
+  "split": "val",
+  "row_count": 4886,
+  "mean_easy_score": 0.04193974676173314,
+  "mean_medium_score": 0.08302851910482438,
+  "mean_hard_score": 0.20776783387391845,
+  "progressive_order_rate": 0.9817846909537454,
+  "sample_outputs": [
+    {
+      "id": "high5060.txt",
+      "question": "What did the writer think of Timothy after learning about his typical day?",
+      "correct_answer_label": "C",
+      "correct_answer_text": "Timothy had a heavy burden.",
+      "hint_easy": "A few minutes with Timothy were enough to confirm that his self-esteem  and general happiness were falling right along with _ .",
+      "hint_medium": "What if Timothy spent thirteen hours a day at a sewing machine instead of a desk?",
+      "hint_hard": "I asked about Timothy's typical day.",
+      "easy_score": 0.046655653148343156,
+      "medium_score": 0.10507493799368713,
+      "hard_score": 0.3121884156808299
+    },
+    {
+      "id": "high5060.txt",
+      "question": "Which of the following statements best describes the writer's opinion?",
+      "correct_answer_label": "A",
+      "correct_answer_text": "Children should be allowed enough time to play.",
+      "hint_easy": "It affects children's creativity, their social skills, and even their brain development.",
+      "hint_medium": "In fact, Timothy had no time to do anything he truly enjoyed, such as playing video games, watching movies, or playing board games with his friends.",
+      "hint_hard": "The absence of play, physical exercise, and freefrom social interaction takes a serious toll on many children.",
+      "easy_score": 0.033012645207827804,
+      "medium_score": 0.03627327241095763,
+      "hard_score": 0.05935110261365045
+    },
+    {
+      "id": "high5060.txt",
+      "question": "According to the passage, how long should a thirdgrader spend a day doing homework?",
+      "correct_answer_label": "C",
+      "correct_answer_text": "No more than thirty minutes.",
+      "hint_easy": "I asked about Timothy's typical day.",
+      "hint_medium": "He awoke every morning at six thirty so he could reach his school by eight and arrived home around four thirty each afternoon.",
+      "hint_hard": "As a fifthgrader, Timothy should have no more than fifty minutes a day of homework (instead of three times that amount).",
+      "easy_score": 0.07424682763960018,
+      "medium_score": 0.11335436404205278,
+      "hard_score": 0.18357183479292405
+    },
+    {
+      "id": "high14410.txt",
+      "question": "According to the report,   _  .",
+      "correct_answer_label": "A",
+      "correct_answer_text": "people won't necessarily lose jobs",
+      "hint_easy": "Although there have always been unemployed people, when we reached a few billion people there were billions of jobs.",
+      "hint_medium": "The report is based on interviews with 200 experts, business leaders and young people from Asia Pacific, Europe and North America.",
+      "hint_hard": "But the report states: \"Losing occupations does not necessarily mean losing jobs -- just changing what people do.\" Growth in new jobs could occur as much, according to the research.",
+      "easy_score": 0.06505112499755249,
+      "medium_score": 0.10135748596468042,
+      "hard_score": 0.2411403562725404
+    },
+    {
+      "id": "high14410.txt",
+      "question": "We can infer from the text that in the future   _  .",
+      "correct_answer_label": "B",
+      "correct_answer_text": "people will take up more creative jobs",
+      "hint_easy": "From self-driving cars to carebots (care+robots) for elderly people, rapid development in technology has long represented a possible threat to many jobs normally performed by people.",
+      "hint_medium": "The optimists pictured \"a future in which robots do not take the place of more jobs than they create,\" according to Aaron Smith, the report's co-author.",
+      "hint_hard": "A growing number of jobs in the future will require creative intelligence, social skills and the ability to use artificial intelligence.",
+      "easy_score": 0.05649305040370724,
+      "medium_score": 0.08796061760522625,
+      "hard_score": 0.13997227627866196
+    },
+    {
+      "id": "high14410.txt",
+      "question": "What is the attitude of most experts in artificial intelligence and robotics to the future?",
+      "correct_answer_label": "C",
+      "correct_answer_text": "Hopeful.",
+      "hint_easy": "The report is based on interviews with 200 experts, business leaders and young people from Asia Pacific, Europe and North America.",
+      "hint_medium": "But experts now believe that almost 50 percent of occupations existing today will be completely unnecessary by 2025 as artificial intelligence continues to change businesses.",
+      "hint_hard": "A 2014 report by Pew Research found 52 percent of experts in artificial intelligence and robotics were optimistic about the future and believed there would still be enough jobs in the next few years.",
+      "easy_score": 0.05109159918976092,
+      "medium_score": 0.14868595551805028,
+      "hard_score": 0.299892302918925
+    },
+    {
+      "id": "high11466.txt",
+      "question": "What would be the best title for this passage?",
+      "correct_answer_label": "A",
+      "correct_answer_text": "History of rings",
+      "hint_easy": "If you do not buy the wedding and engagement rings as a set you will want to be sure the styles are compatible .",
+      "hint_medium": "However, now both men and women show their love and commitment by exchanging rings on their wedding day.",
+      "hint_hard": "But not everyone knows about the history behind this small yet powerful symbol.",
+      "easy_score": 0.057134809661614314,
+      "medium_score": 0.06495686901454517,
+      "hard_score": 0.0736215945663648
+    },
+    {
+      "id": "high11466.txt",
+      "question": "Which is NOT true according to the passage?",
+      "correct_answer_label": "C",
+      "correct_answer_text": "Jewish are so faithful to their beliefs to wear rings on the fourth finger.",
+      "hint_easy": "However, now both men and women show their love and commitment by exchanging rings on their wedding day.",
+      "hint_medium": "It is interesting to note that in the long history of the wedding ring that it is only in the last century that men have begun to wear them.",
+      "hint_hard": "In the Jewish faith, the wedding ring is put on the index finger.",
+      "easy_score": 0.028878195722288138,
+      "medium_score": 0.03633607987925083,
+      "hard_score": 0.09128119738891033
+    },
+    {
+      "id": "high11466.txt",
+      "question": "What can we infer from the passage?",
+      "correct_answer_label": "C",
+      "correct_answer_text": "women wore rings thousands of years earlier than men.",
+      "hint_easy": "If you do not buy the wedding and engagement rings as a set you will want to be sure the styles are compatible .",
+      "hint_medium": "It is interesting to note that in the long history of the wedding ring that it is only in the last century that men have begun to wear them.",
+      "hint_hard": "However, now both men and women show their love and commitment by exchanging rings on their wedding day.",
+      "easy_score": 0.026254236790092044,
+      "medium_score": 0.03079012693098146,
+      "hard_score": 0.11112397460882387
+    },
+    {
+      "id": "high3026.txt",
+      "question": "According to the passage, which statement is NOT sure?",
+      "correct_answer_label": "D",
+      "correct_answer_text": "John and the writer studied in the same college.",
+      "hint_easy": "This can have some embarrassing consequences.",
+      "hint_medium": "Proper nouns seldom found easy purchase in my brain unless I consciously repeat them over and over again.",
+      "hint_hard": "We talked a bit, some amusing remarks about our college experiences and such.",
+      "easy_score": 0.0,
+      "medium_score": 0.0,
+      "hard_score": 0.050352189938764676
+    }
+  ],
+  "output_file": "D:\\23i-0722_AI-project\\AI-Project\\models\\model_b\\outputs\\hints_val.csv"
+}

@@ -1,0 +1,122 @@
+{
+  "generated_at_utc": "2026-05-08T12:14:09.290857+00:00",
+  "seed": 42,
+  "train_rows": 87852,
+  "val_rows": 4886,
+  "test_rows": 4934,
+  "vectorizer": {
+    "max_features": 20000,
+    "ngram_range": [
+      1,
+      2
+    ],
+    "min_df": 2,
+    "stop_words": "english",
+    "sublinear_tf": true
+  },
+  "stacking": {
+    "model_name": "stacking_lr_svm_meta_lr",
+    "stacking_cv": 5,
+    "validation_metrics": {
+      "accuracy": 0.2767089643880475,
+      "macro_f1": 0.20455872432589484,
+      "confusion_matrix_labels": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "confusion_matrix": [
+        [
+          10,
+          191,
+          752,
+          114
+        ],
+        [
+          5,
+          235,
+          895,
+          155
+        ],
+        [
+          9,
+          202,
+          943,
+          149
+        ],
+        [
+          4,
+          216,
+          842,
+          164
+        ]
+      ]
+    },
+    "test_metrics": {
+      "accuracy": 0.27908390758005674,
+      "macro_f1": 0.20332967320336548,
+      "confusion_matrix_labels": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "confusion_matrix": [
+        [
+          14,
+          167,
+          778,
+          104
+        ],
+        [
+          7,
+          221,
+          956,
+          139
+        ],
+        [
+          5,
+          206,
+          988,
+          125
+        ],
+        [
+          5,
+          190,
+          875,
+          154
+        ]
+      ]
+    }
+  },
+  "comparison": {
+    "validation_table_sorted_by_macro_f1": [
+      {
+        "model_name": "linear_svm",
+        "validation_accuracy": 0.2781416291444945,
+        "validation_macro_f1": 0.2745674100786548
+      },
+      {
+        "model_name": "logistic_regression",
+        "validation_accuracy": 0.26852230863692184,
+        "validation_macro_f1": 0.26122041620990355
+      },
+      {
+        "model_name": "ensemble_hard_vote_lr_svm",
+        "validation_accuracy": 0.26852230863692184,
+        "validation_macro_f1": 0.26122041620990355
+      },
+      {
+        "model_name": "stacking_lr_svm_meta_lr",
+        "validation_accuracy": 0.2767089643880475,
+        "validation_macro_f1": 0.20455872432589484
+      },
+      {
+        "model_name": "kmeans_label_mapped",
+        "validation_accuracy": 0.26668031109291856,
+        "validation_macro_f1": 0.10526740992082727
+      }
+    ]
+  }
+}

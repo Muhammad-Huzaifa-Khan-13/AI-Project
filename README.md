@@ -122,3 +122,118 @@ AI-Project/
 - Add unsupervised track (KMeans) and evaluation tables
 - Implement Model B distractor + hint pipeline
 - Integrate all components into Streamlit UI
+
+## Run Model A Baselines
+
+After preprocessing, train Model A baseline classifiers:
+
+```bash
+python -m src.model_a_train
+```
+
+Evaluate on both validation and test splits:
+
+```bash
+python -m src.model_a_train --evaluate-test
+```
+
+Artifacts generated:
+
+- `models/model_a/traditional/logistic_regression.joblib`
+- `models/model_a/traditional/linear_svm.joblib`
+- `models/model_a/reports/baseline_metrics.json`
+
+## Run Model A Unsupervised (KMeans)
+
+Train unsupervised baseline and compare with supervised report:
+
+```bash
+python -m src.model_a_unsupervised
+```
+
+Include test evaluation in addition to validation:
+
+```bash
+python -m src.model_a_unsupervised --evaluate-test
+```
+
+Artifacts generated:
+
+- `models/model_a/traditional/kmeans_label_mapped.joblib`
+- `models/model_a/reports/unsupervised_metrics.json`
+
+## Run Model A Ensemble
+
+Train hard-voting ensemble (Logistic Regression + Linear SVM):
+
+```bash
+python -m src.model_a_ensemble
+```
+
+Include test evaluation:
+
+```bash
+python -m src.model_a_ensemble --evaluate-test
+```
+
+Artifacts generated:
+
+- `models/model_a/traditional/ensemble_hard_vote_lr_svm.joblib`
+- `models/model_a/reports/ensemble_metrics.json`
+
+## Run Model A Stacking Ensemble
+
+Train stacking ensemble (LR + SVM base learners, Logistic Regression meta learner):
+
+```bash
+python -m src.model_a_stacking
+```
+
+Include test evaluation:
+
+```bash
+python -m src.model_a_stacking --evaluate-test
+```
+
+Artifacts generated:
+
+- `models/model_a/traditional/stacking_lr_svm_meta_lr.joblib`
+- `models/model_a/reports/stacking_metrics.json`
+
+## Run Model B Distractor Generation
+
+Generate top-3 distractors using TF-IDF cosine ranking:
+
+```bash
+python -m src.model_b_distractors --split val
+```
+
+Quick sample run:
+
+```bash
+python -m src.model_b_distractors --split val --sample-size 200
+```
+
+Artifacts generated:
+
+- `models/model_b/outputs/distractors_<split>.csv`
+- `models/model_b/reports/distractors_report_<split>.json`
+
+## Run Model B Progressive Hints
+
+Generate easy -> medium -> hard extractive hints from article sentences:
+
+```bash
+python -m src.model_b_hints --split val
+```
+
+Quick sample run:
+
+```bash
+python -m src.model_b_hints --split val --sample-size 200
+```
+
+Artifacts generated:
+
+- `models/model_b/outputs/hints_<split>.csv`
+- `models/model_b/reports/hints_report_<split>.json`
