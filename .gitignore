@@ -30,3 +30,6 @@ models/**/*.pkl
 models/**/*.joblib
 models/**/*.pt
 models/**/*.pth
+
+# Regenerable Model B pipeline outputs (large CSVs)
+models/model_b/outputs/*.csv
