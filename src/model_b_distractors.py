@@ -14,6 +14,7 @@ from .model_b_utils import (
     cosine_between_texts,
     get_correct_answer_text,
     get_wrong_option_texts,
+    is_valid_candidate_text,
     load_processed_split,
     maybe_sample,
     normalize_text,
@@ -110,10 +111,12 @@ def generate_row_distractors(
 
     # Candidate pool = article sentences + existing wrong options.
     candidate_pool = list(dict.fromkeys(sentence_candidates + wrong_options))
-    candidate_pool = [c for c in candidate_pool if c and c != correct_norm]
+    candidate_pool = [c for c in candidate_pool if c and c != correct_norm and is_valid_candidate_text(c, min_tokens=1)]
 
     if not candidate_pool:
-        candidate_pool = [w for w in wrong_options if w and w != correct_norm]
+        candidate_pool = [
+            w for w in wrong_options if w and w != correct_norm and is_valid_candidate_text(w, min_tokens=1)
+        ]
 
     ranked = score_candidates(
         question_text=question_norm,
@@ -126,7 +129,12 @@ def generate_row_distractors(
     # Fallback: ensure always 3 distractors by adding remaining wrong options/ranked candidates.
     selected_texts = [str(s["text"]) for s in selected]
     for fallback in wrong_options + [str(x["text"]) for x in ranked]:
-        if fallback and fallback != correct_norm and fallback not in selected_texts:
+        if (
+            fallback
+            and fallback != correct_norm
+            and fallback not in selected_texts
+            and is_valid_candidate_text(fallback, min_tokens=1)
+        ):
             selected_texts.append(fallback)
         if len(selected_texts) == 3:
             break

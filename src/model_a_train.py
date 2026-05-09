@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 import joblib
+import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -24,15 +25,45 @@ def parse_args() -> argparse.Namespace:
     """Parse CLI arguments for Model A training."""
     parser = argparse.ArgumentParser(description="Train Model A baselines on processed RACE data.")
     parser.add_argument("--seed", type=int, default=DEFAULT_CONFIG.random_seed, help="Random seed value.")
-    parser.add_argument("--max-features", type=int, default=20000, help="TF-IDF max feature count.")
-    parser.add_argument("--ngram-max", type=int, default=2, choices=[1, 2], help="Maximum n-gram length.")
-    parser.add_argument("--min-df", type=int, default=2, help="Minimum document frequency for TF-IDF.")
+    parser.add_argument(
+        "--max-features",
+        type=int,
+        default=10000,
+        help="TF-IDF max features. Lower if you hit MemoryError.",
+    )
+    parser.add_argument(
+        "--ngram-max",
+        type=int,
+        default=1,
+        choices=[1, 2],
+        help="Max n-gram (2 = word bigrams, uses much more RAM on large passages). Default 1 is safer.",
+    )
+    parser.add_argument(
+        "--min-df",
+        type=int,
+        default=5,
+        help="Min document frequency for TF-IDF rows. Higher trims rare tokens and saves RAM.",
+    )
+    parser.add_argument(
+        "--low-memory",
+        action="store_true",
+        help="Force a small vocab (6000 features, unigrams, min_df>=10). Use if MemoryError persists.",
+    )
     parser.add_argument(
         "--evaluate-test",
         action="store_true",
         help="Also evaluate trained models on test split (in addition to validation).",
     )
     return parser.parse_args()
+
+
+def resolve_memory_defaults(args: argparse.Namespace) -> argparse.Namespace:
+    """Apply preset for machines that OOM during TF-IDF vocabulary build."""
+    if args.low_memory:
+        args.max_features = 6000
+        args.ngram_max = 1
+        args.min_df = max(int(args.min_df), 10)
+    return args
 
 
 def load_processed_splits(config: ProjectConfig) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -81,6 +112,7 @@ def build_logreg_pipeline(args: argparse.Namespace) -> Pipeline:
                     ngram_range=(1, args.ngram_max),
                     min_df=args.min_df,
                     sublinear_tf=True,
+                    dtype=np.float32,
                 ),
             ),
             ("classifier", LogisticRegression(max_iter=1000, random_state=args.seed)),
@@ -100,6 +132,7 @@ def build_svm_pipeline(args: argparse.Namespace) -> Pipeline:
                     ngram_range=(1, args.ngram_max),
                     min_df=args.min_df,
                     sublinear_tf=True,
+                    dtype=np.float32,
                 ),
             ),
             ("classifier", LinearSVC(random_state=args.seed)),
@@ -144,6 +177,14 @@ def run_training(config: ProjectConfig, args: argparse.Namespace) -> Path:
     logger.info("Random seed: %s", config.random_seed)
     set_random_seed(config.random_seed)
 
+    logger.info(
+        "TF-IDF settings | max_features=%s ngram_range=(1,%s) min_df=%s low_memory=%s",
+        args.max_features,
+        args.ngram_max,
+        args.min_df,
+        getattr(args, "low_memory", False),
+    )
+
     train_df, val_df, test_df = load_processed_splits(config)
     for split_name, df in [("train", train_df), ("val", val_df), ("test", test_df)]:
         validate_processed_schema(df, split_name)
@@ -173,6 +214,7 @@ def run_training(config: ProjectConfig, args: argparse.Namespace) -> Path:
             "min_df": args.min_df,
             "stop_words": "english",
             "sublinear_tf": True,
+            "dtype": "float32",
         },
         "models": {},
     }
@@ -211,7 +253,7 @@ def run_training(config: ProjectConfig, args: argparse.Namespace) -> Path:
 
 def main() -> None:
     """CLI entrypoint for Model A training."""
-    args = parse_args()
+    args = resolve_memory_defaults(parse_args())
     config = ProjectConfig(random_seed=args.seed)
     run_training(config, args)
 

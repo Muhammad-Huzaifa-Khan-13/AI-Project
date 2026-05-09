@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Dict, List, Sequence, Tuple
 
 import pandas as pd
+from pandas.errors import ParserError
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -40,13 +41,33 @@ def split_into_sentences(article: str) -> List[str]:
     return [p.strip() for p in parts if p and p.strip()]
 
 
+def is_valid_candidate_text(text: object, *, min_tokens: int = 1) -> bool:
+    """
+    Conservative validation for candidate texts used in TF-IDF.
+
+    A text is considered valid if, after normalization, it yields at least
+    `min_tokens` tokens that include at least one alphanumeric character.
+    """
+    norm = normalize_text(text)
+    if not norm:
+        return False
+    tokens = [t for t in norm.split() if any(ch.isalnum() for ch in t)]
+    return len(tokens) >= min_tokens
+
+
 def compute_cosine_to_query(query: str, candidates: Sequence[str], max_features: int = 5000) -> List[float]:
     """Compute cosine similarity between one query and candidate texts."""
     if not candidates:
         return []
     corpus = [query] + list(candidates)
     vectorizer = TfidfVectorizer(stop_words="english", sublinear_tf=True, max_features=max_features)
-    tfidf = vectorizer.fit_transform(corpus)
+    try:
+        tfidf = vectorizer.fit_transform(corpus)
+    except ValueError:
+        # Can happen when all documents are empty after stopword removal.
+        return [0.0 for _ in candidates]
+    if tfidf.shape[0] <= 1 or tfidf.shape[1] == 0:
+        return [0.0 for _ in candidates]
     query_vec = tfidf[0:1]
     cand_vecs = tfidf[1:]
     sims = cosine_similarity(query_vec, cand_vecs)[0]
@@ -57,7 +78,12 @@ def cosine_between_texts(text_a: str, text_b: str, max_features: int = 2000) -> 
     """Compute cosine similarity between two texts."""
     texts = [text_a, text_b]
     vectorizer = TfidfVectorizer(stop_words="english", sublinear_tf=True, max_features=max_features)
-    tfidf = vectorizer.fit_transform(texts)
+    try:
+        tfidf = vectorizer.fit_transform(texts)
+    except ValueError:
+        return 0.0
+    if tfidf.shape[1] == 0:
+        return 0.0
     return float(cosine_similarity(tfidf[0:1], tfidf[1:2])[0][0])
 
 
@@ -75,7 +101,15 @@ def load_processed_split(config: ProjectConfig, split: str) -> pd.DataFrame:
     if not path.exists():
         raise FileNotFoundError(f"Processed split not found: {path}. Run `python -m src.preprocessing` first.")
 
-    df = pd.read_csv(path)
+    try:
+        df = pd.read_csv(path)
+    except ParserError as e:
+        # Some Windows environments can hit a C-engine memory error on wide, text-heavy CSVs.
+        # Fallback to the Python engine for robustness.
+        if "out of memory" in str(e).lower():
+            df = pd.read_csv(path, engine="python")
+        else:
+            raise
     missing = [col for col in REQUIRED_COLUMNS if col not in df.columns]
     if missing:
         raise ValueError(f"Processed split missing required columns: {missing}")

@@ -1,25 +1,26 @@
 {
-  "generated_at_utc": "2026-05-08T11:41:25.998939+00:00",
+  "generated_at_utc": "2026-05-09T16:56:58.054034+00:00",
   "seed": 42,
   "train_rows": 87852,
   "val_rows": 4886,
   "test_rows": 4934,
   "vectorizer": {
-    "max_features": 20000,
+    "max_features": 10000,
     "ngram_range": [
       1,
-      2
+      1
     ],
-    "min_df": 2,
+    "min_df": 5,
     "stop_words": "english",
-    "sublinear_tf": true
+    "sublinear_tf": true,
+    "dtype": "float32"
   },
   "models": {
     "logistic_regression": {
       "model_name": "logistic_regression",
       "validation_metrics": {
-        "accuracy": 0.26852230863692184,
-        "macro_f1": 0.26122041620990355,
+        "accuracy": 0.26340564879246825,
+        "macro_f1": 0.2540467974855039,
         "confusion_matrix_labels": [
           "A",
           "B",
@@ -28,28 +29,28 @@
         ],
         "confusion_matrix": [
           [
-            169,
-            303,
-            333,
-            262
+            154,
+            292,
+            378,
+            243
           ],
           [
-            160,
-            369,
-            437,
-            324
+            156,
+            356,
+            462,
+            316
           ],
           [
-            174,
-            350,
-            444,
-            335
+            172,
+            345,
+            473,
+            313
           ],
           [
-            169,
-            335,
-            392,
-            330
+            165,
+            327,
+            430,
+            304
           ]
         ]
       }
@@ -57,8 +58,8 @@
     "linear_svm": {
       "model_name": "linear_svm",
       "validation_metrics": {
-        "accuracy": 0.2781416291444945,
-        "macro_f1": 0.2745674100786548,
+        "accuracy": 0.2607449856733524,
+        "macro_f1": 0.2539176426530604,
         "confusion_matrix_labels": [
           "A",
           "B",
@@ -67,28 +68,28 @@
         ],
         "confusion_matrix": [
           [
-            222,
-            264,
-            312,
-            269
+            173,
+            289,
+            352,
+            253
           ],
           [
-            198,
-            370,
-            384,
-            338
+            193,
+            351,
+            423,
+            323
           ],
           [
-            219,
-            338,
-            424,
-            322
+            217,
+            331,
+            446,
+            309
           ],
           [
-            229,
-            304,
-            350,
-            343
+            210,
+            316,
+            396,
+            304
           ]
         ]
       }

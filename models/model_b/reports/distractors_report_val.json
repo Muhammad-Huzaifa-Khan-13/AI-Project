@@ -1,150 +1,150 @@
 {
-  "generated_at_utc": "2026-05-08T12:31:52.601619+00:00",
+  "generated_at_utc": "2026-05-09T16:38:58.952154+00:00",
   "seed": 42,
   "split": "val",
-  "row_count": 200,
+  "row_count": 4886,
   "contains_correct_rate": 0.0,
   "unique_top3_rate": 1.0,
-  "mean_overlap_with_original_wrong_options": 0.19333333333333333,
+  "mean_overlap_with_original_wrong_options": 0.17423932323645788,
   "sample_outputs": [
     {
-      "id": "high20234.txt",
-      "question": "A surprising discovery made by the investigators during their visit to ground zero is that   _  .",
-      "correct_answer_label": "B",
-      "correct_answer_text": "some floor framing systems demonstrate resistance to explosion",
-      "distractor_1": "good framing systems may provide a simple but reliable strategy for blast resistance he added",
-      "distractor_2": "photographs taken by the investigators demonstrate the monumental damage to the world trade center towers and buildings nearby",
-      "distractor_3": "complex floor framing systems are more blast resistant",
+      "id": "high5060.txt",
+      "question": "What did the writer think of Timothy after learning about his typical day?",
+      "correct_answer_label": "C",
+      "correct_answer_text": "Timothy had a heavy burden.",
+      "distractor_1": "i asked about timothy s typical day",
+      "distractor_2": "timothy was being mistreated",
+      "distractor_3": "as a fifthgrader timothy should have no more than fifty minutes a day of homework instead of three times that amount",
       "original_wrong_options": [
-        "floors in the faraway buildings remained undamaged",
-        "complex floor framing systems are more blast resistant",
-        "floors in one of the buildings were pierced by tons of debris"
+        "timothy was very hardworking",
+        "timothy was being mistreated",
+        "timothy was enjoying his childhood"
       ]
     },
     {
-      "id": "high247.txt",
-      "question": "The passage aims to give advice on how to   _  .",
+      "id": "high5060.txt",
+      "question": "Which of the following statements best describes the writer's opinion?",
       "correct_answer_label": "A",
-      "correct_answer_text": "balance our work and energy well",
-      "distractor_1": "do you want to be productive at work or at home",
-      "distractor_2": "divide time between work and family",
-      "distractor_3": "when i get into work i find myself less tempted to check personal emails",
+      "correct_answer_text": "Children should be allowed enough time to play.",
+      "distractor_1": "the more they play the more creative children will become",
+      "distractor_2": "the depression caused by homework makes children unwilling to play",
+      "distractor_3": "the absence of play physical exercise and freefrom social interaction takes a serious toll on many children",
       "original_wrong_options": [
-        "take care of our kids at home",
-        "divide time between work and family",
-        "compete against others for a better position"
+        "playing board games works better than playing video games",
+        "the more they play the more creative children will become",
+        "the depression caused by homework makes children unwilling to play"
       ]
     },
     {
-      "id": "high4701.txt",
-      "question": "To achieve success, you must   _  .",
+      "id": "high5060.txt",
+      "question": "According to the passage, how long should a thirdgrader spend a day doing homework?",
+      "correct_answer_label": "C",
+      "correct_answer_text": "No more than thirty minutes.",
+      "distractor_1": "as a fifthgrader timothy should have no more than fifty minutes a day of homework instead of three times that amount",
+      "distractor_2": "experts in the field recommend the minutes children spend on their homework should be no more than ten times the number of their grade level",
+      "distractor_3": "he awoke every morning at six thirty so he could reach his school by eight and arrived home around four thirty each afternoon",
+      "original_wrong_options": [
+        "about ten minutes",
+        "no more than twenty minutes",
+        "about fifty minutes"
+      ]
+    },
+    {
+      "id": "high14410.txt",
+      "question": "According to the report,   _  .",
+      "correct_answer_label": "A",
+      "correct_answer_text": "people won't necessarily lose jobs",
+      "distractor_1": "but the report states losing occupations does not necessarily mean losing jobs just changing what people do growth in new jobs could occur as much according to the research",
+      "distractor_2": "the optimists pictured a future in which robots do not take the place of more jobs than they create according to aaron smith the report s co author",
+      "distractor_3": "the report is based on interviews with 200 experts business leaders and young people from asia pacific europe and north america",
+      "original_wrong_options": [
+        "big companies will face fewer challenges",
+        "small companies will win against big companies",
+        "most people will become interested in technology"
+      ]
+    },
+    {
+      "id": "high14410.txt",
+      "question": "We can infer from the text that in the future   _  .",
       "correct_answer_label": "B",
-      "correct_answer_text": "work like a dog",
-      "distractor_1": "such hard work can make people dog tired",
-      "distractor_2": "this means they have to work very very hard",
-      "distractor_3": "that means many people are competing for the same things like good jobs",
+      "correct_answer_text": "people will take up more creative jobs",
+      "distractor_1": "a growing number of jobs in the future will require creative intelligence social skills and the ability to use artificial intelligence",
+      "distractor_2": "although there have always been unemployed people when we reached a few billion people there were billions of jobs",
+      "distractor_3": "the optimists pictured a future in which robots do not take the place of more jobs than they create according to aaron smith the report s co author",
       "original_wrong_options": [
-        "feel dog tired",
-        "become sick as a dog",
-        "be meaner than a junkyard dog"
+        "people will face many difficulties",
+        "artificial intelligence will threaten people s lives",
+        "most jobs will be done in traditional workplaces"
       ]
     },
     {
-      "id": "middle6062.txt",
-      "question": "At last, Mr. Zhang decides to buy   _   for his little daughter.",
+      "id": "high14410.txt",
+      "question": "What is the attitude of most experts in artificial intelligence and robotics to the future?",
+      "correct_answer_label": "C",
+      "correct_answer_text": "Hopeful.",
+      "distractor_1": "a 2014 report by pew research found 52 percent of experts in artificial intelligence and robotics were optimistic about the future and believed there would still be enough jobs in the next few years",
+      "distractor_2": "a growing number of jobs in the future will require creative intelligence social skills and the ability to use artificial intelligence",
+      "distractor_3": "but experts now believe that almost 50 percent of occupations existing today will be completely unnecessary by 2025 as artificial intelligence continues to change businesses",
+      "original_wrong_options": [
+        "mixed",
+        "worried",
+        "doubtful"
+      ]
+    },
+    {
+      "id": "high11466.txt",
+      "question": "What would be the best title for this passage?",
+      "correct_answer_label": "A",
+      "correct_answer_text": "History of rings",
+      "distractor_1": "the meaning of the rings",
+      "distractor_2": "interesting facts about rings",
+      "distractor_3": "different beliefs about rings",
+      "original_wrong_options": [
+        "interesting facts about rings",
+        "different beliefs about rings",
+        "the meaning of the rings"
+      ]
+    },
+    {
+      "id": "high11466.txt",
+      "question": "Which is NOT true according to the passage?",
+      "correct_answer_label": "C",
+      "correct_answer_text": "Jewish are so faithful to their beliefs to wear rings on the fourth finger.",
+      "distractor_1": "in the jewish faith the wedding ring is put on the index finger",
+      "distractor_2": "this tradition is still commonly practiced today in most parts of the world largely for practical purposes most people are right handed it is worn on the fourth finger of the left hand",
+      "distractor_3": "the meaning of the rings remained unchanged",
+      "original_wrong_options": [
+        "the meaning of the rings remained unchanged",
+        "one should be careful of choosing a ring in a shop from different kinds",
+        "now most people in the world still follow roman catholics traditionally"
+      ]
+    },
+    {
+      "id": "high11466.txt",
+      "question": "What can we infer from the passage?",
+      "correct_answer_label": "C",
+      "correct_answer_text": "women wore rings thousands of years earlier than men.",
+      "distractor_1": "however now both men and women show their love and commitment by exchanging rings on their wedding day",
+      "distractor_2": "the history of the wedding ring goes back not just hundreds but thousands of years",
+      "distractor_3": "only women have the right to make themselves beautiful",
+      "original_wrong_options": [
+        "men were looked upon by women for thousands years",
+        "only women have the right to make themselves beautiful",
+        "you can have an inscription put on the inside the band"
+      ]
+    },
+    {
+      "id": "high3026.txt",
+      "question": "According to the passage, which statement is NOT sure?",
       "correct_answer_label": "D",
-      "correct_answer_text": "two teddy bears",
-      "distractor_1": "zhang sees two lovely teddy bears and decides to buy them",
-      "distractor_2": "he gives the teddy bear to his little daughter and she is very happy",
-      "distractor_3": "today is his little daughter s birthday",
+      "correct_answer_text": "John and the writer studied in the same college.",
+      "distractor_1": "the writer was in his twenties when he met john in the store",
+      "distractor_2": "i ve often had difficulty remembering names",
+      "distractor_3": "proper nouns seldom found easy purchase in my brain unless i consciously repeat them over and over again",
       "original_wrong_options": [
-        "a hair clip",
-        "a card",
-        "a computer"
-      ]
-    },
-    {
-      "id": "middle3828.txt",
-      "question": "Mrs. Green buys   _   for Mr. Green.",
-      "correct_answer_label": "C",
-      "correct_answer_text": "bananas",
-      "distractor_1": "green like fruit very much and every monday mrs",
-      "distractor_2": "green likes bananas only",
-      "distractor_3": "she buys bananas for him every week",
-      "original_wrong_options": [
-        "pears",
-        "apples",
-        "oranges"
-      ]
-    },
-    {
-      "id": "high14855.txt",
-      "question": "Visitors are advised to go to Ueno Park mainly because   _  .",
-      "correct_answer_label": "A",
-      "correct_answer_text": "there are many great museums there",
-      "distractor_1": "museum fans with limited time should consider a visit to ueno park where a variety of first class museums are concentrated closely together including the impressive tokyo national museum the national museum of western art the tokyo metropolitan art museum the national science museum and ueno zoo along with some smaller museums",
-      "distractor_2": "most museums allow entry until 30 minutes before closing time",
-      "distractor_3": "if the regular weekly closing day falls on a national holiday most museums will open on the holiday and close the next day instead",
-      "original_wrong_options": [
-        "it has one of the best parks in japan",
-        "it is a landmark building in tokyo",
-        "it is free of charge throughout the year"
-      ]
-    },
-    {
-      "id": "middle6526.txt",
-      "question": "What color is her ruler?",
-      "correct_answer_label": "A",
-      "correct_answer_text": "Blue.",
-      "distractor_1": "her pen is red and her ruler is blue",
-      "distractor_2": "mary smith is a girl",
-      "distractor_3": "she is 11",
-      "original_wrong_options": [
-        "red",
-        "yellow",
-        "green"
-      ]
-    },
-    {
-      "id": "middle5162.txt",
-      "question": "Who has a nice breakfast?",
-      "correct_answer_label": "B",
-      "correct_answer_text": "The old fox.",
-      "distractor_1": "my babies will have a nice breakfast she thinks",
-      "distractor_2": "an old fox is looking for his breakfast",
-      "distractor_3": "you have very nice babies mrs",
-      "original_wrong_options": [
-        "the crow",
-        "the baby crows",
-        "the fox and the crow"
-      ]
-    },
-    {
-      "id": "middle1097.txt",
-      "question": "Don't let   _   leave your heart.",
-      "correct_answer_label": "C",
-      "correct_answer_text": "your dream",
-      "distractor_1": "don t let it leave your heart",
-      "distractor_2": "in fact everyone can realize his dream",
-      "distractor_3": "the first thing you must do is to remember what your dream is",
-      "original_wrong_options": [
-        "your idea",
-        "your decision",
-        "your book"
-      ]
-    },
-    {
-      "id": "middle148.txt",
-      "question": "Where did the old man promise  to take Mr. Green?",
-      "correct_answer_label": "C",
-      "correct_answer_text": "To the SunHotel.",
-      "distractor_1": "to mr green s house",
-      "distractor_2": "to the old man s house",
-      "distractor_3": "when they came to a small house the old man said stop here mr",
-      "original_wrong_options": [
-        "to mr green s house",
-        "to the old man s house",
-        "to the country"
+        "forgetting your wife s favourite flower is a very serious mistake",
+        "it is common to call an old acquaintance his given name",
+        "the writer was in his twenties when he met john in the store"
       ]
     }
   ],
