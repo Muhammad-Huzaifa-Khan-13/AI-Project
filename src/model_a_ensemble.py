@@ -10,15 +10,11 @@ from typing import Dict, List, Tuple
 
 import joblib
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
-from sklearn.svm import LinearSVC
 
 from .config import DEFAULT_CONFIG, ProjectConfig
+from .model_a_inference import MODEL_LABELS, expand_mcq_rows, predict_option_labels, score_positive_class, true_labels_by_qid
 from .utils import ensure_dir, save_json, set_random_seed, setup_logger, utc_timestamp
-
-MODEL_LABELS = ["A", "B", "C", "D"]
 
 
 def parse_args() -> argparse.Namespace:
@@ -58,22 +54,13 @@ def validate_schema(df: pd.DataFrame, split_name: str) -> None:
         raise ValueError(f"{split_name} split missing required columns: {missing}")
 
 
-def prepare_xy(df: pd.DataFrame) -> Tuple[pd.Series, pd.Series]:
-    """Return input feature text and labels."""
-    x = df["verifier_input"].astype(str)
-    y = df["answer"].astype(str).str.strip().str.upper()
-    return x, y
-
-
-def build_vectorizer(args: argparse.Namespace) -> TfidfVectorizer:
-    """Build shared TF-IDF vectorizer for ensemble members."""
-    return TfidfVectorizer(
-        max_features=args.max_features,
-        stop_words="english",
-        ngram_range=(1, args.ngram_max),
-        min_df=args.min_df,
-        sublinear_tf=True,
-    )
+def predict_with_artifact(artifact: Dict[str, object], df: pd.DataFrame) -> Tuple[List[str], List[str]]:
+    """Predict question-level labels using one option-wise artifact."""
+    batch = expand_mcq_rows(df)
+    x = artifact["vectorizer"].transform(batch.text)
+    scores = score_positive_class(artifact["classifier"], x)
+    pred_qids, y_pred = predict_option_labels(batch.qid, batch.option_label, scores)
+    return pred_qids, y_pred
 
 
 def hard_vote(pred_a: List[str], pred_b: List[str], tie_breaker: List[str]) -> List[str]:
@@ -164,26 +151,29 @@ def run_ensemble_pipeline(config: ProjectConfig, args: argparse.Namespace) -> Pa
     for split_name, df in [("train", train_df), ("val", val_df), ("test", test_df)]:
         validate_schema(df, split_name)
 
-    x_train, y_train = prepare_xy(train_df)
-    x_val, y_val = prepare_xy(val_df)
-    x_test, y_test = prepare_xy(test_df)
+    model_dir = ensure_dir(config.project_root / "models" / "model_a" / "traditional")
+    report_dir = ensure_dir(config.project_root / "models" / "model_a" / "reports")
 
-    vectorizer = build_vectorizer(args)
-    x_train_tfidf = vectorizer.fit_transform(x_train)
-    x_val_tfidf = vectorizer.transform(x_val)
-    x_test_tfidf = vectorizer.transform(x_test)
-    logger.info("Vectorization complete | train_matrix_shape=%s", x_train_tfidf.shape)
+    lr_path = model_dir / "logistic_regression.joblib"
+    svm_path = model_dir / "linear_svm.joblib"
+    if not lr_path.exists() or not svm_path.exists():
+        raise FileNotFoundError(
+            "Missing base Model A artifacts. Run `python -m src.model_a_train --evaluate-test` first."
+        )
 
-    logistic_model = LogisticRegression(max_iter=1000, random_state=args.seed)
-    svm_model = LinearSVC(random_state=args.seed)
-    logistic_model.fit(x_train_tfidf, y_train)
-    svm_model.fit(x_train_tfidf, y_train)
-    logger.info("Trained base models: logistic_regression, linear_svm")
+    lr_artifact = joblib.load(lr_path)
+    svm_artifact = joblib.load(svm_path)
+    if not (isinstance(lr_artifact, dict) and lr_artifact.get("kind") == "optionwise_binary"):
+        raise ValueError("Unsupported logistic_regression artifact format. Re-train with current code.")
+    if not (isinstance(svm_artifact, dict) and svm_artifact.get("kind") == "optionwise_binary"):
+        raise ValueError("Unsupported linear_svm artifact format. Re-train with current code.")
 
-    val_lr_pred = logistic_model.predict(x_val_tfidf).tolist()
-    val_svm_pred = svm_model.predict(x_val_tfidf).tolist()
+    val_qids, val_lr_pred = predict_with_artifact(lr_artifact, val_df)
+    _, val_svm_pred = predict_with_artifact(svm_artifact, val_df)
     val_ensemble_pred = hard_vote(val_lr_pred, val_svm_pred, val_lr_pred)
-    val_metrics = evaluate_predictions(y_val.tolist(), val_ensemble_pred)
+    val_true_map = true_labels_by_qid(val_df)
+    y_val = [val_true_map[qid] for qid in val_qids]
+    val_metrics = evaluate_predictions(y_val, val_ensemble_pred)
 
     disagreement_count = sum(1 for a, b in zip(val_lr_pred, val_svm_pred) if a != b)
     total_val = len(val_lr_pred)
@@ -197,10 +187,12 @@ def run_ensemble_pipeline(config: ProjectConfig, args: argparse.Namespace) -> Pa
     }
 
     if args.evaluate_test:
-        test_lr_pred = logistic_model.predict(x_test_tfidf).tolist()
-        test_svm_pred = svm_model.predict(x_test_tfidf).tolist()
+        test_qids, test_lr_pred = predict_with_artifact(lr_artifact, test_df)
+        _, test_svm_pred = predict_with_artifact(svm_artifact, test_df)
         test_ensemble_pred = hard_vote(test_lr_pred, test_svm_pred, test_lr_pred)
-        result["test_metrics"] = evaluate_predictions(y_test.tolist(), test_ensemble_pred)
+        test_true_map = true_labels_by_qid(test_df)
+        y_test = [test_true_map[qid] for qid in test_qids]
+        result["test_metrics"] = evaluate_predictions(y_test, test_ensemble_pred)
 
     logger.info(
         "Validation | accuracy=%.4f macro_f1=%.4f disagreement_rate=%.4f",
@@ -209,15 +201,12 @@ def run_ensemble_pipeline(config: ProjectConfig, args: argparse.Namespace) -> Pa
         disagreement_rate,
     )
 
-    model_dir = ensure_dir(config.project_root / "models" / "model_a" / "traditional")
-    report_dir = ensure_dir(config.project_root / "models" / "model_a" / "reports")
-
     artifact_path = model_dir / "ensemble_hard_vote_lr_svm.joblib"
     joblib.dump(
         {
-            "vectorizer": vectorizer,
-            "logistic_regression": logistic_model,
-            "linear_svm": svm_model,
+            "kind": "question_ensemble",
+            "logistic_regression_path": str(lr_path),
+            "linear_svm_path": str(svm_path),
             "voting_strategy": "hard_vote_with_lr_tie_breaker",
             "labels": MODEL_LABELS,
         },

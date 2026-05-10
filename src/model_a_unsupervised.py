@@ -9,8 +9,10 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 import joblib
+import numpy as np
 import pandas as pd
 from scipy.sparse import csr_matrix
+from scipy.optimize import linear_sum_assignment
 from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, silhouette_score
@@ -87,14 +89,32 @@ def build_vectorizer(args: argparse.Namespace) -> TfidfVectorizer:
 
 
 def build_cluster_label_mapping(cluster_ids: List[int], labels: List[str]) -> Dict[int, str]:
-    """Map each cluster to the most frequent class label seen in train data."""
+    """Map clusters to labels with a one-to-one assignment whenever possible."""
     grouped: Dict[int, List[str]] = defaultdict(list)
     for cluster_id, label in zip(cluster_ids, labels):
-        grouped[int(cluster_id)].append(label)
+        grouped[int(cluster_id)].append(str(label).strip().upper())
+
+    clusters = sorted(grouped.keys())
+    labels_sorted = list(MODEL_LABELS)
+    count_matrix = np.zeros((len(clusters), len(labels_sorted)), dtype=np.int64)
+
+    for i, cluster_id in enumerate(clusters):
+        counts = Counter(grouped[cluster_id])
+        for j, label in enumerate(labels_sorted):
+            count_matrix[i, j] = int(counts.get(label, 0))
 
     mapping: Dict[int, str] = {}
-    for cluster_id, cluster_labels in grouped.items():
-        mapping[cluster_id] = Counter(cluster_labels).most_common(1)[0][0]
+    if count_matrix.size > 0:
+        # Maximize total agreement via Hungarian assignment (convert to minimization cost).
+        cost = count_matrix.max() - count_matrix
+        row_ind, col_ind = linear_sum_assignment(cost)
+        for r, c in zip(row_ind, col_ind):
+            mapping[clusters[int(r)]] = labels_sorted[int(c)]
+
+    # Fallback for any unmatched clusters.
+    for cluster_id in clusters:
+        if cluster_id not in mapping:
+            mapping[cluster_id] = Counter(grouped[cluster_id]).most_common(1)[0][0]
     return mapping
 
 

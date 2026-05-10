@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-05-08T12:14:09.290857+00:00",
+  "generated_at_utc": "2026-05-09T21:51:47.246255+00:00",
   "seed": 42,
   "train_rows": 87852,
   "val_rows": 4886,
@@ -18,8 +18,8 @@
     "model_name": "stacking_lr_svm_meta_lr",
     "stacking_cv": 5,
     "validation_metrics": {
-      "accuracy": 0.2767089643880475,
-      "macro_f1": 0.20455872432589484,
+      "accuracy": 0.3186655751125665,
+      "macro_f1": 0.2787431029804508,
       "confusion_matrix_labels": [
         "A",
         "B",
@@ -28,34 +28,34 @@
       ],
       "confusion_matrix": [
         [
-          10,
-          191,
-          752,
-          114
+          63,
+          288,
+          535,
+          181
         ],
         [
-          5,
-          235,
-          895,
-          155
+          35,
+          436,
+          606,
+          213
         ],
         [
-          9,
-          202,
-          943,
-          149
+          33,
+          293,
+          763,
+          214
         ],
         [
-          4,
-          216,
-          842,
-          164
+          36,
+          305,
+          590,
+          295
         ]
       ]
     },
     "test_metrics": {
-      "accuracy": 0.27908390758005674,
-      "macro_f1": 0.20332967320336548,
+      "accuracy": 0.3121199837859749,
+      "macro_f1": 0.2677020304202147,
       "confusion_matrix_labels": [
         "A",
         "B",
@@ -64,28 +64,28 @@
       ],
       "confusion_matrix": [
         [
-          14,
-          167,
-          778,
-          104
+          43,
+          293,
+          536,
+          191
         ],
         [
-          7,
-          221,
-          956,
-          139
+          29,
+          429,
+          642,
+          223
         ],
         [
-          5,
-          206,
-          988,
-          125
+          24,
+          300,
+          769,
+          231
         ],
         [
-          5,
-          190,
-          875,
-          154
+          35,
+          289,
+          601,
+          299
         ]
       ]
     }
@@ -94,28 +94,28 @@
     "validation_table_sorted_by_macro_f1": [
       {
         "model_name": "linear_svm",
-        "validation_accuracy": 0.2781416291444945,
-        "validation_macro_f1": 0.2745674100786548
-      },
-      {
-        "model_name": "logistic_regression",
-        "validation_accuracy": 0.26852230863692184,
-        "validation_macro_f1": 0.26122041620990355
-      },
-      {
-        "model_name": "ensemble_hard_vote_lr_svm",
-        "validation_accuracy": 0.26852230863692184,
-        "validation_macro_f1": 0.26122041620990355
+        "validation_accuracy": 0.3127302496930004,
+        "validation_macro_f1": 0.3124749888578895
       },
       {
         "model_name": "stacking_lr_svm_meta_lr",
-        "validation_accuracy": 0.2767089643880475,
-        "validation_macro_f1": 0.20455872432589484
+        "validation_accuracy": 0.3186655751125665,
+        "validation_macro_f1": 0.2787431029804508
+      },
+      {
+        "model_name": "logistic_regression",
+        "validation_accuracy": 0.2756856324191568,
+        "validation_macro_f1": 0.2753546886924788
+      },
+      {
+        "model_name": "ensemble_hard_vote_lr_svm",
+        "validation_accuracy": 0.2756856324191568,
+        "validation_macro_f1": 0.2753546886924788
       },
       {
         "model_name": "kmeans_label_mapped",
-        "validation_accuracy": 0.26668031109291856,
-        "validation_macro_f1": 0.10526740992082727
+        "validation_accuracy": 0.25685632419156773,
+        "validation_macro_f1": 0.24787639165296704
       }
     ]
   }

@@ -18,6 +18,7 @@ import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score
 
 from .config import DEFAULT_CONFIG, ProjectConfig
+from .model_a_inference import predict_df_labels
 from .model_b_distractors import generate_row_distractors
 from .model_b_hints import generate_row_hints
 from .model_b_utils import load_processed_split, normalize_text
@@ -66,9 +67,14 @@ def smoke_test_model_a(config: ProjectConfig, split: str, n: int, artifact_path:
     df = df.head(max(1, n)).reset_index(drop=True)
 
     model = joblib.load(artifact_path)
-    x = df["verifier_input"].astype(str)
     y_true = df["answer"].astype(str).str.strip().str.upper()
-    y_pred = pd.Series(model.predict(x)).astype(str).str.strip().str.upper()
+    if isinstance(model, dict) and model.get("kind") == "optionwise_binary":
+        _, y_true_list, y_pred_list = predict_df_labels(model, df)
+        y_true = pd.Series(y_true_list)
+        y_pred = pd.Series(y_pred_list)
+    else:
+        x = df["verifier_input"].astype(str)
+        y_pred = pd.Series(model.predict(x)).astype(str).str.strip().str.upper()
 
     allowed = {"A", "B", "C", "D"}
     _assert(y_pred.isin(list(allowed)).all(), "Model A produced invalid labels outside A/B/C/D.")

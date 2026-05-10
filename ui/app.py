@@ -15,6 +15,7 @@ import streamlit as st
 
 from src.model_b_distractors import generate_row_distractors
 from src.model_b_hints import generate_row_hints
+from src.model_a_inference import predict_single_row_label
 
 from ui.ui_utils import (
     LABELS,
@@ -442,9 +443,15 @@ def load_model_a_artifact(path: Path):
     return joblib.load(path)
 
 
-def predict_model_a(model, verifier_input: str) -> str:
-    pred = model.predict([verifier_input])[0]
-    return str(pred).strip().upper()
+def predict_model_a(model_artifact, row) -> str:
+  # New artifacts are dictionaries with option-wise scoring components.
+  if isinstance(model_artifact, dict) and model_artifact.get("kind") == "optionwise_binary":
+    return predict_single_row_label(model_artifact, row)
+
+  # Legacy compatibility: old direct-label pipeline on verifier_input.
+  verifier_input = str(row.get("verifier_input", ""))
+  pred = model_artifact.predict([verifier_input])[0]
+  return str(pred).strip().upper()
 
 
 def home_page() -> None:
@@ -529,6 +536,32 @@ def quiz_page() -> None:
         row = df.sample(n=1, random_state=int(st.session_state.get("seed", 42))).iloc[0]
         st.session_state["current_row"] = row
 
+    # Navigation controls: Previous / Next sample (By Index)
+    nav_c1, nav_c2, nav_c3 = st.columns([1, 1, 4])
+    with nav_c1:
+      if st.button("◀ Previous", use_container_width=True):
+        # ensure row_idx present
+        idx = int(st.session_state.get("row_idx", 0))
+        idx = max(0, idx - 1)
+        st.session_state["row_idx"] = int(idx)
+        st.session_state["current_row"] = get_row_by_selector(df, mode="By Index", row_idx=idx, example_id="", seed=int(st.session_state.get("seed", 42)))
+        st.session_state.pop("model_a_pred", None)
+        st.session_state.pop("distractors", None)
+        st.session_state.pop("hints", None)
+        st.session_state["hint_level"] = 0
+    with nav_c2:
+      if st.button("Next ▶", use_container_width=True):
+        idx = int(st.session_state.get("row_idx", 0))
+        idx = min(len(df) - 1, idx + 1)
+        st.session_state["row_idx"] = int(idx)
+        st.session_state["current_row"] = get_row_by_selector(df, mode="By Index", row_idx=idx, example_id="", seed=int(st.session_state.get("seed", 42)))
+        st.session_state.pop("model_a_pred", None)
+        st.session_state.pop("distractors", None)
+        st.session_state.pop("hints", None)
+        st.session_state["hint_level"] = 0
+    with nav_c3:
+      st.markdown(f"**Row:** {int(st.session_state.get('row_idx', 0))} / {len(df)-1}")
+
     article = str(row.get("article", ""))
     question = str(row.get("question", ""))
     options = {k: str(row.get(k, "")) for k in LABELS}
@@ -582,7 +615,7 @@ def quiz_page() -> None:
                 if not verifier_input.strip():
                     st.error("This row has empty `verifier_input`. Re-run preprocessing or pick another sample.")
                 else:
-                    st.session_state["model_a_pred"] = predict_model_a(model, verifier_input)
+                  st.session_state["model_a_pred"] = predict_model_a(model, row)
 
     with a2:
         st.markdown('<div class="section-label">Distractors</div>', unsafe_allow_html=True)

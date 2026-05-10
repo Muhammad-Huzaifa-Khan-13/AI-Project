@@ -11,7 +11,7 @@ import pandas as pd
 import streamlit as st
 
 from src.config import ProjectConfig
-from src.model_b_utils import load_processed_split
+from src.model_b_utils import load_processed_split, maybe_sample
 
 LABELS = ["A", "B", "C", "D"]
 
@@ -24,9 +24,27 @@ _BAR_GRADIENT = ["#58a6ff", "#a371f7", "#3fb950", "#d2a8ff", "#79c0ff"]
 
 
 @st.cache_data(show_spinner=False)
-def load_split_cached(split: str) -> pd.DataFrame:
+def load_split_cached(split: str, max_cached_rows: int | None = None) -> pd.DataFrame:
+    """Load a processed split but avoid caching extremely large DataFrames.
+
+    - If `max_cached_rows` is None, read `st.session_state["max_cached_rows"]` or default 20000.
+    - If the processed split has more rows than `max_cached_rows`, return a sampled subset to
+      avoid Streamlit cache pickling large objects which can cause MemoryError.
+    """
     config = ProjectConfig()
-    return load_processed_split(config, split=split)
+    df = load_processed_split(config, split=split)
+
+    if max_cached_rows is None:
+        try:
+            max_cached_rows = int(st.session_state.get("max_cached_rows", 20000))
+        except Exception:
+            max_cached_rows = 20000
+
+    if len(df) > max_cached_rows:
+        sample_size = max_cached_rows
+        seed = int(st.session_state.get("seed", 42))
+        return maybe_sample(df, sample_size=sample_size, seed=seed)
+    return df
 
 
 def wrap_text(text: str, width: int = 110) -> str:

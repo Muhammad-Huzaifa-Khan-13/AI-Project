@@ -134,7 +134,7 @@ python -m src.model_a_train
 Evaluate on both validation and test splits:
 
 ```bash
-python -m src.model_a_train --evaluate-test
+python -m src.model_a_train --evaluate-test {venv\Scripts\python -m src.model_a_train --evaluate-test}
 ```
 
 Artifacts generated:
@@ -237,3 +237,7 @@ Artifacts generated:
 
 - `models/model_b/outputs/hints_<split>.csv`
 - `models/model_b/reports/hints_report_<split>.json`
+
+## run app
+
+  .\venv\Scripts\python -m streamlit run ui\app.py                                        

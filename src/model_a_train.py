@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 import joblib
 import numpy as np
@@ -16,9 +16,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.svm import LinearSVC
 
 from .config import DEFAULT_CONFIG, ProjectConfig
+from .model_a_inference import MODEL_LABELS, expand_mcq_rows, predict_option_labels, score_positive_class, true_labels_by_qid
 from .utils import ensure_dir, save_json, set_random_seed, setup_logger, utc_timestamp
-
-MODEL_LABELS = ["A", "B", "C", "D"]
 
 
 def parse_args() -> argparse.Namespace:
@@ -93,56 +92,46 @@ def validate_processed_schema(df: pd.DataFrame, split_name: str) -> None:
         raise ValueError(f"{split_name} split missing required columns: {missing}")
 
 
-def prepare_xy(df: pd.DataFrame) -> Tuple[pd.Series, pd.Series]:
-    """Return model input text and labels."""
-    x = df["verifier_input"].astype(str)
-    y = df["answer"].astype(str).str.strip().str.upper()
-    return x, y
+def prepare_binary_xy(df: pd.DataFrame) -> Tuple[List[str], np.ndarray]:
+    """Return option-wise text and binary targets (correct option vs others)."""
+    batch = expand_mcq_rows(df)
+    return batch.text, batch.is_correct
 
 
-def build_logreg_pipeline(args: argparse.Namespace) -> Pipeline:
-    """Build Logistic Regression training pipeline."""
-    return Pipeline(
-        steps=[
-            (
-                "tfidf",
-                TfidfVectorizer(
-                    max_features=args.max_features,
-                    stop_words="english",
-                    ngram_range=(1, args.ngram_max),
-                    min_df=args.min_df,
-                    sublinear_tf=True,
-                    dtype=np.float32,
-                ),
-            ),
-            ("classifier", LogisticRegression(max_iter=1000, random_state=args.seed)),
-        ]
+def build_vectorizer(args: argparse.Namespace) -> TfidfVectorizer:
+    """Build TF-IDF vectorizer for option-wise training."""
+    return TfidfVectorizer(
+        max_features=args.max_features,
+        stop_words="english",
+        ngram_range=(1, args.ngram_max),
+        min_df=args.min_df,
+        sublinear_tf=True,
+        dtype=np.float32,
     )
 
 
-def build_svm_pipeline(args: argparse.Namespace) -> Pipeline:
-    """Build linear SVM training pipeline."""
-    return Pipeline(
-        steps=[
-            (
-                "tfidf",
-                TfidfVectorizer(
-                    max_features=args.max_features,
-                    stop_words="english",
-                    ngram_range=(1, args.ngram_max),
-                    min_df=args.min_df,
-                    sublinear_tf=True,
-                    dtype=np.float32,
-                ),
-            ),
-            ("classifier", LinearSVC(random_state=args.seed)),
-        ]
-    )
+def build_logreg_classifier(args: argparse.Namespace) -> LogisticRegression:
+    """Build binary logistic regression classifier."""
+    return LogisticRegression(max_iter=1000, random_state=args.seed)
 
 
-def evaluate_split(model: Pipeline, x: pd.Series, y_true: pd.Series) -> Dict[str, object]:
-    """Evaluate model and return metrics as a dictionary."""
-    y_pred = model.predict(x)
+def build_svm_classifier(args: argparse.Namespace) -> LinearSVC:
+    """Build binary linear SVM classifier."""
+    return LinearSVC(random_state=args.seed)
+
+
+def evaluate_split(artifact: Dict[str, object], df: pd.DataFrame) -> Dict[str, object]:
+    """Evaluate model at question level by picking top-scored option."""
+    batch = expand_mcq_rows(df)
+    vectorizer = artifact["vectorizer"]
+    classifier = artifact["classifier"]
+    x = vectorizer.transform(batch.text)
+    scores = score_positive_class(classifier, x)
+
+    pred_qids, y_pred = predict_option_labels(batch.qid, batch.option_label, scores)
+    true_map = true_labels_by_qid(df)
+    y_true = [true_map[qid] for qid in pred_qids]
+
     return {
         "accuracy": float(accuracy_score(y_true, y_pred)),
         "macro_f1": float(f1_score(y_true, y_pred, average="macro")),
@@ -153,20 +142,21 @@ def evaluate_split(model: Pipeline, x: pd.Series, y_true: pd.Series) -> Dict[str
 
 def train_and_evaluate(
     name: str,
-    model: Pipeline,
-    x_train: pd.Series,
-    y_train: pd.Series,
-    x_val: pd.Series,
-    y_val: pd.Series,
-    x_test: pd.Series,
-    y_test: pd.Series,
+    artifact: Dict[str, object],
+    x_train: List[str],
+    y_train: np.ndarray,
+    val_df: pd.DataFrame,
+    test_df: pd.DataFrame,
     evaluate_test: bool,
 ) -> Dict[str, object]:
     """Train one model and return training/evaluation summary."""
-    model.fit(x_train, y_train)
-    result: Dict[str, object] = {"model_name": name, "validation_metrics": evaluate_split(model, x_val, y_val)}
+    vectorizer = artifact["vectorizer"]
+    classifier = artifact["classifier"]
+    x_train_tfidf = vectorizer.fit_transform(x_train)
+    classifier.fit(x_train_tfidf, y_train)
+    result: Dict[str, object] = {"model_name": name, "validation_metrics": evaluate_split(artifact, val_df)}
     if evaluate_test:
-        result["test_metrics"] = evaluate_split(model, x_test, y_test)
+        result["test_metrics"] = evaluate_split(artifact, test_df)
     return result
 
 
@@ -189,17 +179,25 @@ def run_training(config: ProjectConfig, args: argparse.Namespace) -> Path:
     for split_name, df in [("train", train_df), ("val", val_df), ("test", test_df)]:
         validate_processed_schema(df, split_name)
 
-    x_train, y_train = prepare_xy(train_df)
-    x_val, y_val = prepare_xy(val_df)
-    x_test, y_test = prepare_xy(test_df)
+    x_train, y_train = prepare_binary_xy(train_df)
     logger.info("Loaded data | train=%s val=%s test=%s", len(train_df), len(val_df), len(test_df))
 
     model_dir = ensure_dir(config.project_root / "models" / "model_a" / "traditional")
     report_dir = ensure_dir(config.project_root / "models" / "model_a" / "reports")
 
-    candidates = {
-        "logistic_regression": build_logreg_pipeline(args),
-        "linear_svm": build_svm_pipeline(args),
+    candidates: Dict[str, Dict[str, object]] = {
+        "logistic_regression": {
+            "kind": "optionwise_binary",
+            "labels": MODEL_LABELS,
+            "vectorizer": build_vectorizer(args),
+            "classifier": build_logreg_classifier(args),
+        },
+        "linear_svm": {
+            "kind": "optionwise_binary",
+            "labels": MODEL_LABELS,
+            "vectorizer": build_vectorizer(args),
+            "classifier": build_svm_classifier(args),
+        },
     }
 
     metrics_report: Dict[str, object] = {
@@ -219,23 +217,21 @@ def run_training(config: ProjectConfig, args: argparse.Namespace) -> Path:
         "models": {},
     }
 
-    for model_name, pipeline in candidates.items():
+    for model_name, artifact in candidates.items():
         logger.info("Training model: %s", model_name)
         result = train_and_evaluate(
             name=model_name,
-            model=pipeline,
+            artifact=artifact,
             x_train=x_train,
             y_train=y_train,
-            x_val=x_val,
-            y_val=y_val,
-            x_test=x_test,
-            y_test=y_test,
+            val_df=val_df,
+            test_df=test_df,
             evaluate_test=args.evaluate_test,
         )
         metrics_report["models"][model_name] = result
 
         model_path = model_dir / f"{model_name}.joblib"
-        joblib.dump(pipeline, model_path)
+        joblib.dump(artifact, model_path)
         logger.info("Saved model: %s", model_path)
         logger.info(
             "%s | val_accuracy=%.4f val_macro_f1=%.4f",

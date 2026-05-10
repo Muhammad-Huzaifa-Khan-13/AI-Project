@@ -8,18 +8,14 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 import joblib
+import numpy as np
 import pandas as pd
-from sklearn.ensemble import StackingClassifier
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
-from sklearn.pipeline import Pipeline
-from sklearn.svm import LinearSVC
 
 from .config import DEFAULT_CONFIG, ProjectConfig
+from .model_a_inference import MODEL_LABELS, expand_mcq_rows, predict_option_labels, score_positive_class, true_labels_by_qid
 from .utils import ensure_dir, save_json, set_random_seed, setup_logger, utc_timestamp
-
-MODEL_LABELS = ["A", "B", "C", "D"]
 
 
 def parse_args() -> argparse.Namespace:
@@ -56,46 +52,42 @@ def validate_schema(df: pd.DataFrame, split_name: str) -> None:
         raise ValueError(f"{split_name} split missing required columns: {missing}")
 
 
-def prepare_xy(df: pd.DataFrame) -> Tuple[pd.Series, pd.Series]:
-    """Return input feature text and labels."""
-    x = df["verifier_input"].astype(str)
-    y = df["answer"].astype(str).str.strip().str.upper()
-    return x, y
-
-
-def build_tfidf(args: argparse.Namespace) -> TfidfVectorizer:
-    """Build TF-IDF vectorizer used by base learners."""
-    return TfidfVectorizer(
-        max_features=args.max_features,
-        stop_words="english",
-        ngram_range=(1, args.ngram_max),
-        min_df=args.min_df,
-        sublinear_tf=True,
+def _option_score_table(artifact: Dict[str, object], df: pd.DataFrame, prefix: str) -> pd.DataFrame:
+    """Compute one score per option and pivot to question-level feature table."""
+    batch = expand_mcq_rows(df)
+    x = artifact["vectorizer"].transform(batch.text)
+    scores = score_positive_class(artifact["classifier"], x)
+    tab = pd.DataFrame(
+        {
+            "qid": batch.qid,
+            "option": batch.option_label,
+            f"{prefix}_score": scores,
+        }
     )
+    wide = tab.pivot(index="qid", columns="option", values=f"{prefix}_score").reindex(columns=MODEL_LABELS)
+    wide.columns = [f"{prefix}_{c}" for c in wide.columns]
+    return wide.reset_index()
 
 
-def build_stacking_pipeline(args: argparse.Namespace) -> Pipeline:
-    """Create full stacking pipeline with shared text preprocessing."""
-    base_estimators = [
-        ("lr", LogisticRegression(max_iter=1000, random_state=args.seed)),
-        ("svm", LinearSVC(random_state=args.seed)),
-    ]
-    meta_estimator = LogisticRegression(max_iter=1000, random_state=args.seed)
+def build_meta_features(lr_artifact: Dict[str, object], svm_artifact: Dict[str, object], df: pd.DataFrame) -> pd.DataFrame:
+    """Build question-level stacking features from base-model option scores."""
+    lr_tab = _option_score_table(lr_artifact, df, "lr")
+    svm_tab = _option_score_table(svm_artifact, df, "svm")
+    feat = lr_tab.merge(svm_tab, on="qid", how="inner")
+    return feat
 
-    stacker = StackingClassifier(
-        estimators=base_estimators,
-        final_estimator=meta_estimator,
-        cv=args.cv,
-        n_jobs=None,
-        passthrough=False,
-    )
 
-    return Pipeline(
-        steps=[
-            ("tfidf", build_tfidf(args)),
-            ("stacking", stacker),
-        ]
-    )
+def labels_for_feature_table(feat_df: pd.DataFrame, source_df: pd.DataFrame) -> List[str]:
+    """Align true labels to feature rows by qid."""
+    true_map = true_labels_by_qid(source_df)
+    return [true_map[str(qid)] for qid in feat_df["qid"].tolist()]
+
+
+def predict_meta_labels(meta_model: LogisticRegression, feat_df: pd.DataFrame) -> List[str]:
+    """Predict question labels from meta features."""
+    feature_cols = [c for c in feat_df.columns if c != "qid"]
+    x = feat_df[feature_cols].to_numpy(dtype=np.float64)
+    return meta_model.predict(x).tolist()
 
 
 def evaluate_predictions(y_true: List[str], y_pred: List[str]) -> Dict[str, object]:
@@ -181,17 +173,43 @@ def run_stacking_pipeline(config: ProjectConfig, args: argparse.Namespace) -> Pa
     for split_name, df in [("train", train_df), ("val", val_df), ("test", test_df)]:
         validate_schema(df, split_name)
 
-    x_train, y_train = prepare_xy(train_df)
-    x_val, y_val = prepare_xy(val_df)
-    x_test, y_test = prepare_xy(test_df)
     logger.info("Loaded data | train=%s val=%s test=%s", len(train_df), len(val_df), len(test_df))
 
-    model = build_stacking_pipeline(args)
+    model_dir = ensure_dir(config.project_root / "models" / "model_a" / "traditional")
+    report_dir = ensure_dir(config.project_root / "models" / "model_a" / "reports")
+    lr_path = model_dir / "logistic_regression.joblib"
+    svm_path = model_dir / "linear_svm.joblib"
+    if not lr_path.exists() or not svm_path.exists():
+        raise FileNotFoundError(
+            "Missing base Model A artifacts. Run `python -m src.model_a_train --evaluate-test` first."
+        )
+
+    lr_artifact = joblib.load(lr_path)
+    svm_artifact = joblib.load(svm_path)
+    if not (isinstance(lr_artifact, dict) and lr_artifact.get("kind") == "optionwise_binary"):
+        raise ValueError("Unsupported logistic_regression artifact format. Re-train with current code.")
+    if not (isinstance(svm_artifact, dict) and svm_artifact.get("kind") == "optionwise_binary"):
+        raise ValueError("Unsupported linear_svm artifact format. Re-train with current code.")
+
+    train_feat = build_meta_features(lr_artifact, svm_artifact, train_df)
+    val_feat = build_meta_features(lr_artifact, svm_artifact, val_df)
+    test_feat = build_meta_features(lr_artifact, svm_artifact, test_df)
+
+    y_train = labels_for_feature_table(train_feat, train_df)
+    y_val = labels_for_feature_table(val_feat, val_df)
+    y_test = labels_for_feature_table(test_feat, test_df)
+
+    feature_cols = [c for c in train_feat.columns if c != "qid"]
+    x_train = train_feat[feature_cols].to_numpy(dtype=np.float64)
+    x_val = val_feat[feature_cols].to_numpy(dtype=np.float64)
+    x_test = test_feat[feature_cols].to_numpy(dtype=np.float64)
+
+    model = LogisticRegression(max_iter=1000, random_state=args.seed)
     model.fit(x_train, y_train)
-    logger.info("Trained stacking ensemble")
+    logger.info("Trained stacking meta model")
 
     val_pred = model.predict(x_val).tolist()
-    val_metrics = evaluate_predictions(y_val.tolist(), val_pred)
+    val_metrics = evaluate_predictions(y_val, val_pred)
 
     result: Dict[str, object] = {
         "model_name": "stacking_lr_svm_meta_lr",
@@ -201,7 +219,7 @@ def run_stacking_pipeline(config: ProjectConfig, args: argparse.Namespace) -> Pa
 
     if args.evaluate_test:
         test_pred = model.predict(x_test).tolist()
-        result["test_metrics"] = evaluate_predictions(y_test.tolist(), test_pred)
+        result["test_metrics"] = evaluate_predictions(y_test, test_pred)
 
     logger.info(
         "Validation | accuracy=%.4f macro_f1=%.4f",
@@ -209,10 +227,18 @@ def run_stacking_pipeline(config: ProjectConfig, args: argparse.Namespace) -> Pa
         val_metrics["macro_f1"],
     )
 
-    model_dir = ensure_dir(config.project_root / "models" / "model_a" / "traditional")
-    report_dir = ensure_dir(config.project_root / "models" / "model_a" / "reports")
     artifact_path = model_dir / "stacking_lr_svm_meta_lr.joblib"
-    joblib.dump(model, artifact_path)
+    joblib.dump(
+        {
+            "kind": "meta_stacking",
+            "labels": MODEL_LABELS,
+            "feature_columns": feature_cols,
+            "meta_model": model,
+            "base_logistic_path": str(lr_path),
+            "base_svm_path": str(svm_path),
+        },
+        artifact_path,
+    )
     logger.info("Saved stacking artifact: %s", artifact_path)
 
     baseline_report = load_report(report_dir / "baseline_metrics.json")

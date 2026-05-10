@@ -20,6 +20,7 @@ from typing import Any, Dict, Optional
 import joblib
 
 from src.config import DEFAULT_CONFIG, ProjectConfig
+from src.model_a_inference import predict_single_row_label
 from src.model_b_distractors import generate_row_distractors
 from src.model_b_hints import generate_row_hints
 from src.model_b_utils import load_processed_split
@@ -82,7 +83,10 @@ def run_model_a(row, artifact_path: Path) -> Dict[str, str]:
         return {"status": "missing_column", "message": "Processed row has no `verifier_input` column."}
 
     model = joblib.load(artifact_path)
-    pred_label = str(model.predict([str(row["verifier_input"])])[0]).strip().upper()
+    if isinstance(model, dict) and model.get("kind") == "optionwise_binary":
+        pred_label = predict_single_row_label(model, row)
+    else:
+        pred_label = str(model.predict([str(row["verifier_input"])])[0]).strip().upper()
     pred_text = safe_get(row, pred_label, default="")
     return {"status": "ok", "pred_label": pred_label, "pred_text": pred_text}
 
